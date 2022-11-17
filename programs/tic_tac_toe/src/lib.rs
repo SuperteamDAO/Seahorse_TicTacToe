@@ -177,7 +177,7 @@ mod tic_tac_toe {
     pub struct InitGame<'info> {
         #[account(mut)]
         pub owner: Signer<'info>,
-        # [account (init , space = std :: mem :: size_of :: < dot :: program :: Game > () + 8 , payer = owner , seeds = ["Game-account" . as_bytes () . as_ref () , owner . key () . as_ref ()] , bump)]
+        # [account (init , space = std :: mem :: size_of :: < dot :: program :: Game > () + 8 , payer = owner)]
         pub game: Box<Account<'info, dot::program::Game>>,
         pub rent: Sysvar<'info, Rent>,
         pub system_program: Program<'info, System>,

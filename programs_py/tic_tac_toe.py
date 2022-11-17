@@ -21,13 +21,11 @@ class Game(Account):
 def init_game(owner:Signer,player1:Pubkey,player2:Pubkey,game:Empty[Game]):
   game=game.init(
     payer=owner,
-    seeds=["Game-account",owner]
   )
   game.player1=player1
   game.player2=player2
   game.game_status=0
   game.next_move=1
-
 
 def win_check(moves:Array[u8,10]) -> i8:
   if((moves[1]==1 and moves[2]==1 and moves[3]==1) or (moves[1]==1 and moves[4]==1 and moves[7]==1) or 
@@ -35,10 +33,10 @@ def win_check(moves:Array[u8,10]) -> i8:
     (moves[1]==1 and moves[5]==1 and moves[9]==1 ) or (moves[3]==1 and moves[5]==1 and moves[7]==1) or
     (moves[2]==1 and moves[5]==1 and moves[8]==1) or (moves[4]==1 and moves[5]==1 and moves[6]==1)):
       return 1
-  elif((moves[1]==1 and moves[2]==1 and moves[3]==1) or (moves[1]==1 and moves[4]==1 and moves[7]==1) or 
-    (moves[7]==1  and moves[8]==1 and moves[9]==1) or (moves[3]==1 and moves[6]==1 and moves[9]==1) or
-    (moves[1]==1 and moves[5]==1 and moves[9]==1 ) or (moves[3]==1 and moves[5]==1 and moves[7]==1) or
-    (moves[2]==1 and moves[5]==1 and moves[8]==1) or (moves[4]==1 and moves[5]==1 and moves[6]==1)):
+  elif((moves[1]==2 and moves[2]==2 and moves[3]==2) or (moves[1]==2 and moves[4]==2 and moves[7]==2) or 
+    (moves[7]==2  and moves[8]==2 and moves[9]==2) or (moves[3]==2 and moves[6]==2 and moves[9]==2) or
+    (moves[1]==2 and moves[5]==2 and moves[9]==2 ) or (moves[3]==2 and moves[5]==2 and moves[7]==2) or
+    (moves[2]==2 and moves[5]==2 and moves[8]==2) or (moves[4]==2 and moves[5]==2 and moves[6]==2)):
       return 2
   elif((moves[1]==1 or moves[1]==2) and (moves[2]==1 or moves[2]==2) and(moves[3]==1 or moves[3]==2) and (moves[4]==1 or moves[4]==2) and (moves[5]==1 or moves[5]==2) and (moves[6]==1 or moves[6]==2) and
        (moves[7]==1 or moves[7]==2) and (moves[2]==1 or moves[8]==2) and (moves[9]==1 or moves[9]==2)):
@@ -48,6 +46,7 @@ def win_check(moves:Array[u8,10]) -> i8:
     
 @instruction
 def play_game(owner:Signer,game_data:Game,played_by:u8,move_position:u8):
+  move_position=move_position-1
   if(game_data.game_status==0):
     if((game_data.moves[move_position]==0) and (game_data.next_move==played_by)):
       if(game_data.next_move==1):

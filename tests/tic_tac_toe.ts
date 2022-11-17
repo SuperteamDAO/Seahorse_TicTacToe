@@ -25,8 +25,8 @@ describe("tic_tac_toe", async() => {
         await program.provider.connection.confirmTransaction(txhash);
       })   
     it("play Game", async()=>{
-      const person=2;
-      const position=2;
+      const person=1;
+      const position=1;
       const txhash=await program.methods.playGame(person,position)
       .accounts({
         owner:program.provider.publicKey,

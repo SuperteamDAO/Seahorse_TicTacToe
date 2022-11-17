@@ -73,12 +73,96 @@ pub struct LoadedGame<'info, 'entrypoint> {
     pub next_move: u8,
 }
 
+pub fn win_check(mut moves: Mutable<[u8; 10]>) -> i8 {
+    if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
+        && (moves.borrow()[moves.wrapped_index(2)] == 1))
+        && (moves.borrow()[moves.wrapped_index(3)] == 1))
+        || (((moves.borrow()[moves.wrapped_index(1)] == 1)
+            && (moves.borrow()[moves.wrapped_index(4)] == 1))
+            && (moves.borrow()[moves.wrapped_index(7)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(7)] == 1)
+            && (moves.borrow()[moves.wrapped_index(8)] == 1))
+            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(3)] == 1)
+            && (moves.borrow()[moves.wrapped_index(6)] == 1))
+            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(1)] == 1)
+            && (moves.borrow()[moves.wrapped_index(5)] == 1))
+            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(3)] == 1)
+            && (moves.borrow()[moves.wrapped_index(5)] == 1))
+            && (moves.borrow()[moves.wrapped_index(7)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(2)] == 1)
+            && (moves.borrow()[moves.wrapped_index(5)] == 1))
+            && (moves.borrow()[moves.wrapped_index(8)] == 1)))
+        || (((moves.borrow()[moves.wrapped_index(4)] == 1)
+            && (moves.borrow()[moves.wrapped_index(5)] == 1))
+            && (moves.borrow()[moves.wrapped_index(6)] == 1))
+    {
+        return 1;
+    } else {
+        if (((((((((moves.borrow()[moves.wrapped_index(1)] == 2)
+            && (moves.borrow()[moves.wrapped_index(2)] == 2))
+            && (moves.borrow()[moves.wrapped_index(3)] == 2))
+            || (((moves.borrow()[moves.wrapped_index(1)] == 2)
+                && (moves.borrow()[moves.wrapped_index(4)] == 2))
+                && (moves.borrow()[moves.wrapped_index(7)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(7)] == 2)
+                && (moves.borrow()[moves.wrapped_index(8)] == 2))
+                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(3)] == 2)
+                && (moves.borrow()[moves.wrapped_index(6)] == 2))
+                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(1)] == 2)
+                && (moves.borrow()[moves.wrapped_index(5)] == 2))
+                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(3)] == 2)
+                && (moves.borrow()[moves.wrapped_index(5)] == 2))
+                && (moves.borrow()[moves.wrapped_index(7)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(2)] == 2)
+                && (moves.borrow()[moves.wrapped_index(5)] == 2))
+                && (moves.borrow()[moves.wrapped_index(8)] == 2)))
+            || (((moves.borrow()[moves.wrapped_index(4)] == 2)
+                && (moves.borrow()[moves.wrapped_index(5)] == 2))
+                && (moves.borrow()[moves.wrapped_index(6)] == 2))
+        {
+            return 2;
+        } else {
+            if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
+                || (moves.borrow()[moves.wrapped_index(1)] == 2))
+                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(2)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(3)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(3)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(4)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(4)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(5)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(5)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(6)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(6)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(7)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(7)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(8)] == 2)))
+                && ((moves.borrow()[moves.wrapped_index(9)] == 1)
+                    || (moves.borrow()[moves.wrapped_index(9)] == 2))
+            {
+                return 3;
+            } else {
+                return 0;
+            }
+        }
+    }
+}
+
 pub fn play_game_handler<'info>(
     mut owner: SeahorseSigner<'info, '_>,
     mut game_data: Mutable<LoadedGame<'info, '_>>,
     mut played_by: u8,
     mut move_position: u8,
 ) -> () {
+    let mut move_position = move_position - 1;
+
     if game_data.borrow().game_status == 0 {
         if (game_data.borrow().moves.borrow()[game_data
             .borrow()
@@ -154,88 +238,6 @@ pub fn play_game_handler<'info>(
         }
     } else {
         solana_program::msg!("{}", "Invalid Instruction");
-    }
-}
-
-pub fn win_check(mut moves: Mutable<[u8; 10]>) -> i8 {
-    if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
-        && (moves.borrow()[moves.wrapped_index(2)] == 1))
-        && (moves.borrow()[moves.wrapped_index(3)] == 1))
-        || (((moves.borrow()[moves.wrapped_index(1)] == 1)
-            && (moves.borrow()[moves.wrapped_index(4)] == 1))
-            && (moves.borrow()[moves.wrapped_index(7)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(7)] == 1)
-            && (moves.borrow()[moves.wrapped_index(8)] == 1))
-            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(3)] == 1)
-            && (moves.borrow()[moves.wrapped_index(6)] == 1))
-            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(1)] == 1)
-            && (moves.borrow()[moves.wrapped_index(5)] == 1))
-            && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(3)] == 1)
-            && (moves.borrow()[moves.wrapped_index(5)] == 1))
-            && (moves.borrow()[moves.wrapped_index(7)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(2)] == 1)
-            && (moves.borrow()[moves.wrapped_index(5)] == 1))
-            && (moves.borrow()[moves.wrapped_index(8)] == 1)))
-        || (((moves.borrow()[moves.wrapped_index(4)] == 1)
-            && (moves.borrow()[moves.wrapped_index(5)] == 1))
-            && (moves.borrow()[moves.wrapped_index(6)] == 1))
-    {
-        return 1;
-    } else {
-        if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
-            && (moves.borrow()[moves.wrapped_index(2)] == 1))
-            && (moves.borrow()[moves.wrapped_index(3)] == 1))
-            || (((moves.borrow()[moves.wrapped_index(1)] == 1)
-                && (moves.borrow()[moves.wrapped_index(4)] == 1))
-                && (moves.borrow()[moves.wrapped_index(7)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(7)] == 1)
-                && (moves.borrow()[moves.wrapped_index(8)] == 1))
-                && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(3)] == 1)
-                && (moves.borrow()[moves.wrapped_index(6)] == 1))
-                && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(1)] == 1)
-                && (moves.borrow()[moves.wrapped_index(5)] == 1))
-                && (moves.borrow()[moves.wrapped_index(9)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(3)] == 1)
-                && (moves.borrow()[moves.wrapped_index(5)] == 1))
-                && (moves.borrow()[moves.wrapped_index(7)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(2)] == 1)
-                && (moves.borrow()[moves.wrapped_index(5)] == 1))
-                && (moves.borrow()[moves.wrapped_index(8)] == 1)))
-            || (((moves.borrow()[moves.wrapped_index(4)] == 1)
-                && (moves.borrow()[moves.wrapped_index(5)] == 1))
-                && (moves.borrow()[moves.wrapped_index(6)] == 1))
-        {
-            return 2;
-        } else {
-            if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
-                || (moves.borrow()[moves.wrapped_index(1)] == 2))
-                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(2)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(3)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(3)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(4)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(4)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(5)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(5)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(6)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(6)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(7)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(7)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(8)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(9)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(9)] == 2))
-            {
-                return 3;
-            } else {
-                return 0;
-            }
-        }
     }
 }
 
