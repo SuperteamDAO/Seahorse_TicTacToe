@@ -9,8 +9,7 @@ use std::{cell::RefCell, rc::Rc};
 #[account]
 #[derive(Debug)]
 pub struct Game {
-    pub player1: Pubkey,
-    pub player2: Pubkey,
+    pub players: [Pubkey; 3],
     pub moves: [u8; 10],
     pub game_status: u8,
     pub next_move: u8,
@@ -21,8 +20,7 @@ impl<'info, 'entrypoint> Game {
         account: &'entrypoint mut Box<Account<'info, Self>>,
         programs_map: &'entrypoint ProgramsMap<'info>,
     ) -> Mutable<LoadedGame<'info, 'entrypoint>> {
-        let player1 = account.player1.clone();
-        let player2 = account.player2.clone();
+        let players = Mutable::new(account.players.clone());
         let moves = Mutable::new(account.moves.clone());
         let game_status = account.game_status;
         let next_move = account.next_move;
@@ -30,8 +28,7 @@ impl<'info, 'entrypoint> Game {
         Mutable::new(LoadedGame {
             __account__: account,
             __programs__: programs_map,
-            player1,
-            player2,
+            players,
             moves,
             game_status,
             next_move,
@@ -40,13 +37,9 @@ impl<'info, 'entrypoint> Game {
 
     pub fn store(loaded: Mutable<LoadedGame>) {
         let mut loaded = loaded.borrow_mut();
-        let player1 = loaded.player1.clone();
+        let players = loaded.players.borrow().clone();
 
-        loaded.__account__.player1 = player1;
-
-        let player2 = loaded.player2.clone();
-
-        loaded.__account__.player2 = player2;
+        loaded.__account__.players = players;
 
         let moves = loaded.moves.borrow().clone();
 
@@ -66,8 +59,7 @@ impl<'info, 'entrypoint> Game {
 pub struct LoadedGame<'info, 'entrypoint> {
     pub __account__: &'entrypoint mut Box<Account<'info, Game>>,
     pub __programs__: &'entrypoint ProgramsMap<'info>,
-    pub player1: Pubkey,
-    pub player2: Pubkey,
+    pub players: Mutable<[Pubkey; 3]>,
     pub moves: Mutable<[u8; 10]>,
     pub game_status: u8,
     pub next_move: u8,
@@ -100,144 +92,141 @@ pub fn win_check(mut moves: Mutable<[u8; 10]>) -> i8 {
             && (moves.borrow()[moves.wrapped_index(6)] == 1))
     {
         return 1;
+    }
+
+    if (((((((((moves.borrow()[moves.wrapped_index(1)] == 2)
+        && (moves.borrow()[moves.wrapped_index(2)] == 2))
+        && (moves.borrow()[moves.wrapped_index(3)] == 2))
+        || (((moves.borrow()[moves.wrapped_index(1)] == 2)
+            && (moves.borrow()[moves.wrapped_index(4)] == 2))
+            && (moves.borrow()[moves.wrapped_index(7)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(7)] == 2)
+            && (moves.borrow()[moves.wrapped_index(8)] == 2))
+            && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(3)] == 2)
+            && (moves.borrow()[moves.wrapped_index(6)] == 2))
+            && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(1)] == 2)
+            && (moves.borrow()[moves.wrapped_index(5)] == 2))
+            && (moves.borrow()[moves.wrapped_index(9)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(3)] == 2)
+            && (moves.borrow()[moves.wrapped_index(5)] == 2))
+            && (moves.borrow()[moves.wrapped_index(7)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(2)] == 2)
+            && (moves.borrow()[moves.wrapped_index(5)] == 2))
+            && (moves.borrow()[moves.wrapped_index(8)] == 2)))
+        || (((moves.borrow()[moves.wrapped_index(4)] == 2)
+            && (moves.borrow()[moves.wrapped_index(5)] == 2))
+            && (moves.borrow()[moves.wrapped_index(6)] == 2))
+    {
+        return 2;
+    }
+
+    if ((((((((moves.borrow()[moves.wrapped_index(1)] > 0)
+        && (moves.borrow()[moves.wrapped_index(2)] > 0))
+        && (moves.borrow()[moves.wrapped_index(3)] > 0))
+        && (moves.borrow()[moves.wrapped_index(4)] > 0))
+        && (moves.borrow()[moves.wrapped_index(5)] > 0))
+        && (moves.borrow()[moves.wrapped_index(6)] > 0))
+        && (moves.borrow()[moves.wrapped_index(7)] > 0))
+        && (moves.borrow()[moves.wrapped_index(8)] > 0))
+        && (moves.borrow()[moves.wrapped_index(9)] > 0)
+    {
+        return 3;
     } else {
-        if (((((((((moves.borrow()[moves.wrapped_index(1)] == 2)
-            && (moves.borrow()[moves.wrapped_index(2)] == 2))
-            && (moves.borrow()[moves.wrapped_index(3)] == 2))
-            || (((moves.borrow()[moves.wrapped_index(1)] == 2)
-                && (moves.borrow()[moves.wrapped_index(4)] == 2))
-                && (moves.borrow()[moves.wrapped_index(7)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(7)] == 2)
-                && (moves.borrow()[moves.wrapped_index(8)] == 2))
-                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(3)] == 2)
-                && (moves.borrow()[moves.wrapped_index(6)] == 2))
-                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(1)] == 2)
-                && (moves.borrow()[moves.wrapped_index(5)] == 2))
-                && (moves.borrow()[moves.wrapped_index(9)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(3)] == 2)
-                && (moves.borrow()[moves.wrapped_index(5)] == 2))
-                && (moves.borrow()[moves.wrapped_index(7)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(2)] == 2)
-                && (moves.borrow()[moves.wrapped_index(5)] == 2))
-                && (moves.borrow()[moves.wrapped_index(8)] == 2)))
-            || (((moves.borrow()[moves.wrapped_index(4)] == 2)
-                && (moves.borrow()[moves.wrapped_index(5)] == 2))
-                && (moves.borrow()[moves.wrapped_index(6)] == 2))
-        {
-            return 2;
-        } else {
-            if (((((((((moves.borrow()[moves.wrapped_index(1)] == 1)
-                || (moves.borrow()[moves.wrapped_index(1)] == 2))
-                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(2)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(3)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(3)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(4)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(4)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(5)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(5)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(6)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(6)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(7)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(7)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(2)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(8)] == 2)))
-                && ((moves.borrow()[moves.wrapped_index(9)] == 1)
-                    || (moves.borrow()[moves.wrapped_index(9)] == 2))
-            {
-                return 3;
-            } else {
-                return 0;
-            }
-        }
+        return 0;
     }
 }
 
 pub fn play_game_handler<'info>(
-    mut owner: SeahorseSigner<'info, '_>,
+    mut player: SeahorseSigner<'info, '_>,
     mut game_data: Mutable<LoadedGame<'info, '_>>,
     mut played_by: u8,
     mut move_position: u8,
 ) -> () {
-    let mut move_position = move_position - 1;
+    if !(game_data.borrow().players.borrow()[game_data
+        .borrow()
+        .players
+        .wrapped_index((played_by as i128))]
+        == player.key())
+    {
+        panic!("Invalid Signer");
+    }
 
-    if game_data.borrow().game_status == 0 {
-        if (game_data.borrow().moves.borrow()[game_data
-            .borrow()
-            .moves
-            .wrapped_index((move_position as i128))]
-            == 0)
-            && (game_data.borrow().next_move == played_by)
-        {
-            if game_data.borrow().next_move == 1 {
-                index_assign!(
-                    game_data.borrow().moves.borrow_mut(),
-                    game_data
-                        .borrow()
-                        .moves
-                        .wrapped_index((move_position as i128)),
-                    1
-                );
+    if !(game_data.borrow().game_status == 0) {
+        panic!("Invalid Instruction");
+    }
 
-                assign!(game_data.borrow_mut().next_move, 2);
-            } else {
-                if game_data.borrow().next_move == 2 {
-                    index_assign!(
-                        game_data.borrow().moves.borrow_mut(),
-                        game_data
-                            .borrow()
-                            .moves
-                            .wrapped_index((move_position as i128)),
-                        2
-                    );
+    if !(played_by == game_data.borrow().next_move) {
+        panic!("Invalid Player");
+    }
 
-                    assign!(game_data.borrow_mut().next_move, 1);
-                }
-            }
-        } else {
-            solana_program::msg!("{}", "wrong move");
-        }
+    if !(game_data.borrow().moves.borrow()[game_data
+        .borrow()
+        .moves
+        .wrapped_index((move_position as i128))]
+        == 0)
+    {
+        panic!("Invalid move position");
+    }
 
-        let mut game_status = win_check(Mutable::new(
-            <_ as TryInto<[_; 10]>>::try_into(
-                (game_data
+    if game_data.borrow().next_move == 1 {
+        index_assign!(
+            game_data.borrow().moves.borrow_mut(),
+            game_data
+                .borrow()
+                .moves
+                .wrapped_index((move_position as i128)),
+            1
+        );
+
+        assign!(game_data.borrow_mut().next_move, 2);
+    } else {
+        if game_data.borrow().next_move == 2 {
+            index_assign!(
+                game_data.borrow().moves.borrow_mut(),
+                game_data
                     .borrow()
                     .moves
-                    .borrow()
-                    .iter()
-                    .map(|element| element.clone()))
-                .collect::<Vec<_>>(),
-            )
-            .unwrap(),
-        ));
+                    .wrapped_index((move_position as i128)),
+                2
+            );
 
-        if game_status == 0 {
-            solana_program::msg!("{}", game_data.borrow().next_move);
+            assign!(game_data.borrow_mut().next_move, 1);
+        }
+    }
+
+    let mut game_status = win_check(Mutable::new(
+        <_ as TryInto<[_; 10]>>::try_into(
+            (game_data
+                .borrow()
+                .moves
+                .borrow()
+                .iter()
+                .map(|element| element.clone()))
+            .collect::<Vec<_>>(),
+        )
+        .unwrap(),
+    ));
+
+    if game_status == 0 {
+        solana_program::msg!("{}", game_data.borrow().next_move);
+    } else {
+        if game_status == 1 {
+            assign!(game_data.borrow_mut().game_status, 1);
+
+            solana_program::msg!("{}", "player1 wins the Game");
         } else {
-            if game_status == 1 {
-                assign!(game_data.borrow_mut().game_status, 1);
+            if game_status == 2 {
+                assign!(game_data.borrow_mut().game_status, 2);
 
-                solana_program::msg!("{}", "player1 wins the Game");
+                solana_program::msg!("{}", "player2 wins the Game");
             } else {
-                if game_status == 2 {
-                    assign!(game_data.borrow_mut().game_status, 2);
+                assign!(game_data.borrow_mut().game_status, 3);
 
-                    solana_program::msg!("{}", "player2 win the game");
-                } else {
-                    if game_status == 3 {
-                        assign!(game_data.borrow_mut().game_status, 3);
-
-                        solana_program::msg!("{}", "The Game was draw");
-                    } else {
-                        solana_program::msg!("{}", "Error Game");
-                    }
-                }
+                solana_program::msg!("{}", "Game Draw");
             }
         }
-    } else {
-        solana_program::msg!("{}", "Invalid Instruction");
     }
 }
 
@@ -249,9 +238,17 @@ pub fn init_game_handler<'info>(
 ) -> () {
     let mut game = game.account.clone();
 
-    assign!(game.borrow_mut().player1, player1);
+    index_assign!(
+        game.borrow().players.borrow_mut(),
+        game.borrow().players.wrapped_index(1),
+        player1
+    );
 
-    assign!(game.borrow_mut().player2, player2);
+    index_assign!(
+        game.borrow().players.borrow_mut(),
+        game.borrow().players.wrapped_index(2),
+        player2
+    );
 
     assign!(game.borrow_mut().game_status, 0);
 

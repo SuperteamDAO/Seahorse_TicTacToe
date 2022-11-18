@@ -150,7 +150,7 @@ mod tic_tac_toe {
     # [instruction (played_by : u8 , move_position : u8)]
     pub struct PlayGame<'info> {
         #[account(mut)]
-        pub owner: Signer<'info>,
+        pub player: Signer<'info>,
         #[account(mut)]
         pub game_data: Box<Account<'info, dot::program::Game>>,
     }
@@ -158,14 +158,14 @@ mod tic_tac_toe {
     pub fn play_game(ctx: Context<PlayGame>, played_by: u8, move_position: u8) -> Result<()> {
         let mut programs = HashMap::new();
         let programs_map = ProgramsMap(programs);
-        let owner = SeahorseSigner {
-            account: &ctx.accounts.owner,
+        let player = SeahorseSigner {
+            account: &ctx.accounts.player,
             programs: &programs_map,
         };
 
         let game_data = dot::program::Game::load(&mut ctx.accounts.game_data, &programs_map);
 
-        play_game_handler(owner.clone(), game_data.clone(), played_by, move_position);
+        play_game_handler(player.clone(), game_data.clone(), played_by, move_position);
 
         dot::program::Game::store(game_data);
 
