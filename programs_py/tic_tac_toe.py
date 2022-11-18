@@ -80,5 +80,7 @@ def play_game(player:Signer,game_data:Game,played_by:u8,move_position:u8):
    elif(game_status==State.draw):
      game_data.game_status=3
      print("Game Draw")
+   else:
+     print("Game Error")
 
   
