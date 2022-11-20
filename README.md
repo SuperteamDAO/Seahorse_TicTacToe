@@ -34,7 +34,7 @@ click on the link and you get a detailed explanation to get start with Seahorse.
 
 # Program Accounts
 
-In this Project , we have used only one account,Game account. it contains data fields like `player1:Pubkey` `player2:Pubkey` `moves:Array[u8,9]` `game_status:u8` `next_move:u8`
+In this Project , we have used only one account,Game account. it contains data fields like `players:Array[Pubkey,2]` `moves:Array[u8,9]` `game_status:u8` `next_move:u8`
 
 we need to initialize the Game account to start the game.
 
