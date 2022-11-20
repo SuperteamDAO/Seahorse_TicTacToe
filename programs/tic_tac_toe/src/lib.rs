@@ -13,10 +13,13 @@ use anchor_spl::{
 use dot::program::*;
 use std::{cell::RefCell, rc::Rc};
 
-declare_id!("HNBneQ4xwdY7VLmb7HiWYUyKUjf2JjacA1mnJWTLp7B6");
+declare_id!("G5s63XbRZMDnypYYBcnZZxg73FftZ2byYe1KbpcNXUwf");
 
 pub mod seahorse_util {
     use super::*;
+
+    #[cfg(feature = "pyth-sdk-solana")]
+    pub use pyth_sdk_solana::{load_price_feed_from_account_info, PriceFeed};
     use std::{collections::HashMap, fmt::Debug, ops::Deref};
 
     pub struct Mutable<T>(Rc<RefCell<T>>);
@@ -55,7 +58,7 @@ pub mod seahorse_util {
 
     impl<T: Clone> Mutable<Vec<T>> {
         pub fn wrapped_index(&self, mut index: i128) -> usize {
-            if index > 0 {
+            if index >= 0 {
                 return index.try_into().unwrap();
             }
 
@@ -67,7 +70,7 @@ pub mod seahorse_util {
 
     impl<T: Clone, const N: usize> Mutable<[T; N]> {
         pub fn wrapped_index(&self, mut index: i128) -> usize {
-            if index > 0 {
+            if index >= 0 {
                 return index.try_into().unwrap();
             }
 
@@ -147,40 +150,14 @@ mod tic_tac_toe {
     use std::collections::HashMap;
 
     #[derive(Accounts)]
-    # [instruction (played_by : u8 , move_position : u8)]
-    pub struct PlayGame<'info> {
-        #[account(mut)]
-        pub player: Signer<'info>,
-        #[account(mut)]
-        pub game_data: Box<Account<'info, dot::program::Game>>,
-    }
-
-    pub fn play_game(ctx: Context<PlayGame>, played_by: u8, move_position: u8) -> Result<()> {
-        let mut programs = HashMap::new();
-        let programs_map = ProgramsMap(programs);
-        let player = SeahorseSigner {
-            account: &ctx.accounts.player,
-            programs: &programs_map,
-        };
-
-        let game_data = dot::program::Game::load(&mut ctx.accounts.game_data, &programs_map);
-
-        play_game_handler(player.clone(), game_data.clone(), played_by, move_position);
-
-        dot::program::Game::store(game_data);
-
-        return Ok(());
-    }
-
-    #[derive(Accounts)]
     # [instruction (player1 : Pubkey , player2 : Pubkey)]
     pub struct InitGame<'info> {
         #[account(mut)]
         pub owner: Signer<'info>,
         # [account (init , space = std :: mem :: size_of :: < dot :: program :: Game > () + 8 , payer = owner)]
         pub game: Box<Account<'info, dot::program::Game>>,
-        pub rent: Sysvar<'info, Rent>,
         pub system_program: Program<'info, System>,
+        pub rent: Sysvar<'info, Rent>,
     }
 
     pub fn init_game(ctx: Context<InitGame>, player1: Pubkey, player2: Pubkey) -> Result<()> {
@@ -205,6 +182,32 @@ mod tic_tac_toe {
         init_game_handler(owner.clone(), player1, player2, game.clone());
 
         dot::program::Game::store(game.account);
+
+        return Ok(());
+    }
+
+    #[derive(Accounts)]
+    # [instruction (played_by : u8 , move_position : u8)]
+    pub struct PlayGame<'info> {
+        #[account(mut)]
+        pub player: Signer<'info>,
+        #[account(mut)]
+        pub game_data: Box<Account<'info, dot::program::Game>>,
+    }
+
+    pub fn play_game(ctx: Context<PlayGame>, played_by: u8, move_position: u8) -> Result<()> {
+        let mut programs = HashMap::new();
+        let programs_map = ProgramsMap(programs);
+        let player = SeahorseSigner {
+            account: &ctx.accounts.player,
+            programs: &programs_map,
+        };
+
+        let game_data = dot::program::Game::load(&mut ctx.accounts.game_data, &programs_map);
+
+        play_game_handler(player.clone(), game_data.clone(), played_by, move_position);
+
+        dot::program::Game::store(game_data);
 
         return Ok(());
     }
